@@ -1,0 +1,41 @@
+name: "Build & Deploy Backend"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Select environment"
+        required: true
+
+jobs:
+  main:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ format('{0}', github.event.inputs.stage) || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      # - name: Configure aws credentials
+      #   uses: aws-actions/configure-aws-credentials@master
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK '6.0.x'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'   
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet publish --configuration "Release" --framework "net6.0" --runtime linux-x64 --self-contained false --no-restore    
