@@ -19,7 +19,7 @@ jobs:
     name: Build & Deploy
     runs-on: ubuntu-latest
     environment:
-      name: github.event.inputs.stage
+      name: ${{ format('{0}', github.event.inputs.stage) || 'dev' }}
     permissions:
       id-token: write
       contents: read
@@ -59,4 +59,4 @@ jobs:
 
           echo "** Running Terraform Apply**"
           terraform apply -auto-approve
-        working-directory: ${{ format('./tf-resources/envs/{0}/api', github.event.inputs.stage )}}       
+        working-directory: ${{ format('tf-resources/envs/{0}/api', github.event.inputs.stage || 'dev' )}}       
